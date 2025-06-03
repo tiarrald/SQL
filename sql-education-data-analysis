@@ -1,0 +1,63 @@
+#SQL Project: Education Data Analysis
+
+This project analyzes textbook, author, and course data using SQL to uncover trends in curriculum updates, subject focus, and contributor impact. 
+These queries demonstrate practical SQL skills including joins, filtering, grouping, and ordering, all framed around real world education scenarios.
+
+This analysis used a dataset that includes four main tables:
+
+- Textbooks: Title, subject, publication year, whether it’s current, and any updated version.
+- Courses: Grade level and associated textbook.
+- Authors: Author names and which textbook (if any) they’re currently reviewing.
+- AuthorTextbookLink: Relationship table mapping which authors contributed to which textbooks.
+
+# Analysis: 
+--Which courses are still using outdated textbooks despite newer versions being available?
+SELECT Courses.CourseName,
+Textbooks.Current, 
+Textbooks.UpdatedVersion,
+Textbooks.Title as 'Outdated Title'
+FROM Courses
+LEFT JOIN Textbooks
+ON Courses.TextbookID = Textbooks.TextbookID
+WHERE Textbooks.Current = 'No' and Textbooks.Current IS NOT NULL;
+
+--Which authors have contributed to science textbooks, and how current is their work?
+SELECT Authors.Name as AuthorsName,
+Textbooks.Title as Title,
+Textbooks.PublicationYear
+FROM Authors
+JOIN AuthorTextbookLink
+ON Authors.AuthorID = AuthorTextbookLink.AuthorID
+JOIN Textbooks
+ON AuthorTextbookLink.TextbookID = Textbooks.TextbookID
+WHERE Textbooks.Subject = 'Science';
+
+--Show a timeline of economics textbook publications and which ones are still in use.
+SELECT Subject,
+PublicationYear,
+Current
+FROM Textbooks
+WHERE Subject = 'Economics'
+ORDER BY PublicationYear desc
+;
+
+--List the top 3 authors based on the number of textbooks they’ve written.
+SELECT Authors.Name,
+COUNT(Textbooks.Title) as TextbookCount
+FROM Authors
+JOIN AuthorTextbookLink
+ON Authors.AuthorID = AuthorTextbookLink.AuthorID
+JOIN Textbooks
+ON AuthorTextbookLink.TextbookID = Textbooks.TextbookID
+GROUP BY Authors.Name
+ORDER BY TextbookCount DESC
+LIMIT 3;
+
+--Which subjects have the most textbook updates over time?
+
+SELECT Subject,
+COUNT(UpdatedVersion) AS NumberOfUpdates
+FROM Textbooks
+WHERE UpdatedVersion IS NOT NULL
+GROUP BY Subject
+ORDER BY NumberOfUpdates DESC;
