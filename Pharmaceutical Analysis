@@ -1,0 +1,50 @@
+# SQL Project: Pharmaceutical Sales and Drug Analysis
+
+This project analyzes drug, sales, and pharmacy data using SQL to uncover trends in prescription volume, revenue performance, and drug safety reporting.  
+These queries demonstrate practical SQL skills including joins, filtering, grouping, aggregation, and real-world business insights relevant to the healthcare and pharmaceutical industry.
+
+This analysis uses a dataset with three core relational tables:
+
+- Drugs: Drug name, category (e.g., diabetes, blood pressure), unit price, units sold, and reported side effects.
+- Pharmacies: Pharmacy names and locations.
+- Sales: Tracks which pharmacy sold which drug, how many units were sold, and when.
+
+Analysis
+
+--Which pharmacies sold the most units of each drug?
+
+SELECT Drugs.DrugName,
+  Pharmacies.PharmacyName,
+  SUM(Sales.UnitsSold) AS TotalUnitsSold
+FROM Pharmacies
+JOIN Sales
+  ON Pharmacies.PharmacyID = Sales.PharmacyID
+JOIN Drugs
+  ON Sales.DrugID = Drugs.DrugID
+GROUP BY Drugs.DrugName, Pharmacies.PharmacyName;
+
+--What is the total revenue generated per drug across all pharmacies?
+
+SELECT Drugs.DrugName,
+  SUM(Sales.UnitsSold * Drugs.PricePerUnit) AS TotalRevenue
+FROM Sales 
+JOIN Drugs
+ON Sales.DrugID = Drugs.DrugID
+GROUP BY Drugs.DrugName;
+
+--Which drug categories report the most side effects?
+
+SELECT Category,
+  SUM(SideEffectReports) AS TotalSideEffects
+FROM Drugs
+GROUP BY Category;
+
+--Which pharmacy had the highest total sales in February 2023?
+
+SELECT p.PharmacyName,
+  SUM(s.UnitsSold * d.PricePerUnit) AS FebruaryRevenue
+FROM Sales s
+JOIN Drugs d ON s.DrugID = d.DrugID
+JOIN Pharmacies p ON s.PharmacyID = p.PharmacyID
+WHERE s.SaleMonth = '2023-02'
+GROUP BY p.PharmacyName;
